@@ -113,22 +113,6 @@ function renderStockVisual(car, carIndex) {
               &#8250;
             </button>
           </div>
-          <div class="gallery-thumbnails" aria-label="Browse photos for ${escapeHtml(car.title)}">
-            ${images
-              .map(
-                (galleryImage, imageIndex) => `
-                  <button
-                    class="gallery-thumbnail${imageIndex === 0 ? " is-active" : ""}"
-                    type="button"
-                    data-gallery-thumb="${imageIndex}"
-                    aria-label="Show photo ${imageIndex + 1} for ${escapeHtml(car.title)}"
-                  >
-                    <img src="${escapeHtml(galleryImage)}" alt="" loading="lazy" />
-                  </button>
-                `
-              )
-              .join("")}
-          </div>
         ` : ""}
         <div class="visual-label">${escapeHtml(car.stockNo || "Stock car")}${car.featured ? " / Featured" : ""}</div>
       </div>
@@ -152,7 +136,6 @@ function updateGallery(gallery, nextIndex) {
   const safeIndex = ((nextIndex % images.length) + images.length) % images.length;
   const imageElement = gallery.querySelector(".gallery-main-button img");
   const countElement = gallery.querySelector(".gallery-count");
-  const thumbnails = gallery.querySelectorAll("[data-gallery-thumb]");
 
   if (imageElement) {
     imageElement.src = images[safeIndex];
@@ -162,10 +145,6 @@ function updateGallery(gallery, nextIndex) {
   if (countElement) {
     countElement.textContent = `${safeIndex + 1} / ${images.length}`;
   }
-
-  thumbnails.forEach((thumbnail) => {
-    thumbnail.classList.toggle("is-active", Number(thumbnail.dataset.galleryThumb) === safeIndex);
-  });
 
   gallery.dataset.imageIndex = String(safeIndex);
 }
@@ -282,17 +261,12 @@ function renderHeroStock() {
     return;
   }
 
-  const heroCards =
-    carsToShow.length === 1
-      ? carsToShow
-      : carsToShow.length === 2
-        ? [carsToShow[0], carsToShow[1], carsToShow[0]]
-        : carsToShow.slice(0, 3);
+  const heroCards = [carsToShow[0]];
 
   heroRotator.innerHTML = heroCards
     .map(
       (car) => `
-        <article class="hero-vehicle-card${heroCards.length === 1 ? " hero-vehicle-card-static is-visible" : ""}">
+        <article class="hero-vehicle-card hero-vehicle-card-static is-visible">
           <div class="hero-vehicle-top">
             <span class="hero-vehicle-badge">${escapeHtml(car.badge || "Used car")}</span>
             <strong class="hero-vehicle-price">${escapeHtml(car.priceLabel || formatPrice(car.price))}</strong>
@@ -366,7 +340,6 @@ initializeStockGalleries();
 
 document.addEventListener("click", (event) => {
   const galleryButton = event.target.closest("[data-gallery-nav]");
-  const galleryThumbnail = event.target.closest("[data-gallery-thumb]");
   const galleryOpenButton = event.target.closest("[data-gallery-open]");
   const lightboxCloseButton = event.target.closest("[data-lightbox-close]");
   const lightboxNavButton = event.target.closest("[data-lightbox-nav]");
@@ -380,15 +353,6 @@ document.addEventListener("click", (event) => {
     if (!gallery) return;
 
     updateGallery(gallery, Number(gallery.dataset.imageIndex || 0) + direction);
-    return;
-  }
-
-  if (galleryThumbnail) {
-    const gallery = galleryThumbnail.closest("[data-gallery]");
-
-    if (!gallery) return;
-
-    updateGallery(gallery, Number(galleryThumbnail.dataset.galleryThumb));
     return;
   }
 

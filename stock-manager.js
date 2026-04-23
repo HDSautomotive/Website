@@ -34,6 +34,7 @@ const saveState = document.querySelector("#save-state");
 const photoInput = document.querySelector("#photo-input");
 const photoDropzone = document.querySelector("#photo-dropzone");
 const photoList = document.querySelector("#photo-list");
+const advertTextField = form?.elements.advertText;
 
 document.querySelector("#add-car")?.addEventListener("click", addCar);
 document.querySelector("#duplicate-car")?.addEventListener("click", duplicateCar);
@@ -42,6 +43,8 @@ document.querySelector("#download-stock")?.addEventListener("click", downloadSto
 document.querySelector("#reload-file")?.addEventListener("click", reloadFromFile);
 document.querySelector("#choose-photos")?.addEventListener("click", () => photoInput?.click());
 document.querySelector("#clear-photos")?.addEventListener("click", clearPhotos);
+document.querySelector("#apply-advert-text")?.addEventListener("click", applyAdvertText);
+document.querySelector("#smart-fill")?.addEventListener("click", smartFillCurrentCar);
 
 stockListElement?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-index]");
@@ -200,6 +203,7 @@ function renderForm() {
   form.elements.heroVisualClass.value = car.heroVisualClass;
   form.elements.specs.value = car.specs.join("\n");
   form.elements.images.value = car.images.join("\n");
+  if (advertTextField) advertTextField.value = "";
 }
 
 function renderPreview() {
@@ -298,6 +302,43 @@ function handleFormChange() {
   renderList();
   renderPreview();
   renderPhotoList();
+}
+
+function applyAdvertText() {
+  const car = cars[selectedIndex];
+  if (!car || !advertTextField) return;
+
+  const parsed = parseAdvertText(advertTextField.value);
+
+  if (!parsed.hasData) {
+    if (saveState) saveState.textContent = "Nothing useful found in the pasted advert text yet.";
+    return;
+  }
+
+  if (parsed.title) car.title = parsed.title;
+  if (parsed.year) car.year = parsed.year;
+  if (parsed.reg) car.reg = parsed.reg;
+  if (parsed.price) car.price = parsed.price;
+  if (parsed.mileage) car.mileage = parsed.mileage;
+  if (parsed.fuel) car.fuel = parsed.fuel;
+  if (parsed.gearbox) car.gearbox = parsed.gearbox;
+
+  smartFillCar(car, { overwriteSummary: false });
+  persistCars();
+  renderAll();
+
+  if (saveState) saveState.textContent = "Applied the pasted advert details. Check the fields and fine-tune anything needed.";
+}
+
+function smartFillCurrentCar() {
+  const car = cars[selectedIndex];
+  if (!car) return;
+
+  smartFillCar(car, { overwriteSummary: false });
+  persistCars();
+  renderAll();
+
+  if (saveState) saveState.textContent = "Filled in the missing details I could infer from the current car.";
 }
 
 function addPhotoFiles(files) {
@@ -425,6 +466,100 @@ function sanitiseFilename(filename) {
   return `${cleanBase}${extension}`;
 }
 
+function parseAdvertText(value) {
+  const text = String(value ?? "").trim();
+  if (!text) return { hasData: false };
+
+  const lines = text
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  const joined = lines.join(" ");
+  const yearMatch = joined.match(/\b(20\d{2}|19\d{2})\b/);
+  const regMatch = joined.match(/\b([A-Z]{2}\d{2}\s?[A-Z]{3}|[A-Z]\d{1,3}\s?[A-Z]{3}|[A-Z]{3}\s?\d{1,3}[A-Z])\b/i);
+  const mileageMatch = joined.match(/\b([\d,]{3,})\s*(?:miles|mile|mi)\b/i);
+  const priceMatch = joined.match(/£\s?([\d,]+)/i);
+  const fuelMatch = joined.match(/\b(Petrol|Diesel|Hybrid|Electric|Plug-in Hybrid)\b/i);
+  const gearboxMatch = joined.match(/\b(Manual|Automatic|Semi-automatic|Auto)\b/i);
+
+  const likelyTitle =
+    lines.find((line) => /\b(20\d{2}|19\d{2})\b/.test(line) && /[A-Za-z]/.test(line)) ||
+    lines.find((line) => /^[A-Za-z][A-Za-z0-9\s\-\/]{6,}$/.test(line)) ||
+    "";
+
+  return {
+    hasData: Boolean(likelyTitle || yearMatch || regMatch || mileageMatch || priceMatch || fuelMatch || gearboxMatch),
+    title: cleanTitleFromAdvert(likelyTitle),
+    year: yearMatch?.[1] || "",
+    reg: normaliseRegistration(regMatch?.[1] || ""),
+    price: priceMatch ? Number(priceMatch[1].replaceAll(",", "")) : 0,
+    mileage: mileageMatch ? mileageMatch[1].replaceAll(",", "") : "",
+    fuel: normaliseCapitalisation(fuelMatch?.[1] || ""),
+    gearbox: normaliseGearbox(gearboxMatch?.[1] || "")
+  };
+}
+
+function cleanTitleFromAdvert(value) {
+  return String(value ?? "")
+    .replace(/\b(20\d{2}|19\d{2})\b/g, "")
+    .replace(/\b(reg|registration)\b.*$/i, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+function normaliseRegistration(value) {
+  return String(value ?? "")
+    .toUpperCase()
+    .replace(/\s+/g, "")
+    .replace(/^(.{4,4})(.+)$/, "$1 $2")
+    .trim();
+}
+
+function normaliseCapitalisation(value) {
+  const text = String(value ?? "").trim().toLowerCase();
+  if (!text) return "";
+  return text.replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+function normaliseGearbox(value) {
+  const text = String(value ?? "").trim().toLowerCase();
+  if (text === "auto") return "Automatic";
+  return normaliseCapitalisation(text);
+}
+
+function getNextStockNumber() {
+  const highest = cars.reduce((max, car) => {
+    const match = String(car.stockNo ?? "").match(/(\d+)/);
+    return match ? Math.max(max, Number(match[1])) : max;
+  }, 100);
+
+  return `HDS${String(highest + 1).padStart(3, "0")}`;
+}
+
+function smartFillCar(car, options = {}) {
+  const { overwriteSummary = false } = options;
+
+  if (!car.stockNo) car.stockNo = getNextStockNumber();
+  if (!car.enquiryName && car.title) car.enquiryName = car.title;
+  if (!car.priceLabel && car.price > 0) car.priceLabel = formatPrice(car.price);
+  if (!car.badge) car.badge = inferBadge(car.title);
+  if (!car.status) car.status = "In stock";
+  if ((overwriteSummary || !car.summary) && car.summary) {
+    car.summary = car.summary.trim();
+  }
+}
+
+function inferBadge(title) {
+  const text = String(title ?? "").toLowerCase();
+  if (!text) return "Used car";
+  if (text.includes("fiesta") || text.includes("corsa") || text.includes("polo")) return "Hatchback";
+  if (text.includes("sport") || text.includes("st") || text.includes("gti")) return "Performance";
+  if (text.includes("x1") || text.includes("q3") || text.includes("tiguan") || text.includes("suv")) return "SUV";
+  if (text.includes("transit") || text.includes("van")) return "Van";
+  return "Used car";
+}
+
 function splitLines(value) {
   return value
     .split(/\r?\n/)
@@ -438,7 +573,10 @@ function persistCars() {
 }
 
 function addCar() {
-  cars.unshift(defaultCar());
+  cars.unshift(normaliseCar({
+    ...defaultCar(),
+    stockNo: getNextStockNumber()
+  }));
   selectedIndex = 0;
   persistCars();
   renderAll();

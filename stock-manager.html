@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HDS Automotive Stock Manager</title>
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="stock-manager.css" />
+</head>
+<body>
+  <div class="manager-shell">
+    <header class="manager-header">
+      <div>
+        <p class="eyebrow">Local stock editor</p>
+        <h1>Manage cars and photos without editing code by hand.</h1>
+        <p class="lead">
+          Update the form, preview the result, then download a fresh <code>stock-data.js</code> for the site.
+        </p>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="action-btn action-btn-secondary" id="reload-file">Reload from file</button>
+        <button type="button" class="action-btn" id="download-stock">Download stock-data.js</button>
+      </div>
+    </header>
+
+    <main class="manager-layout">
+      <aside class="manager-panel stock-list-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Stock list</p>
+            <h2>Cars on the site</h2>
+          </div>
+          <button type="button" class="action-btn action-btn-small" id="add-car">Add car</button>
+        </div>
+
+        <div class="stock-list" id="stock-list"></div>
+
+        <div class="list-actions">
+          <button type="button" class="action-btn action-btn-secondary action-btn-small" id="duplicate-car">Duplicate</button>
+          <button type="button" class="action-btn action-btn-danger action-btn-small" id="delete-car">Delete</button>
+        </div>
+      </aside>
+
+      <section class="manager-panel editor-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Car details</p>
+            <h2>Edit selected car</h2>
+          </div>
+          <p class="save-state" id="save-state">Changes save in this browser while you work.</p>
+        </div>
+
+        <form id="car-form" class="car-form">
+          <div class="form-grid">
+            <label>Stock number<input type="text" name="stockNo" /></label>
+            <label>Car title<input type="text" name="title" /></label>
+            <label>Year<input type="text" name="year" placeholder="Example: 2019" /></label>
+            <label>Registration<input type="text" name="reg" placeholder="Example: AB19 XYZ" /></label>
+            <label>Price number<input type="number" name="price" min="0" step="1" /></label>
+            <label>Price label<input type="text" name="priceLabel" placeholder="Leave blank to auto-format price" /></label>
+            <label>Mileage<input type="number" name="mileage" min="0" step="1" placeholder="Example: 42000" /></label>
+            <label>Fuel<input type="text" name="fuel" placeholder="Example: Petrol" /></label>
+            <label>Gearbox<input type="text" name="gearbox" placeholder="Example: Automatic" /></label>
+            <label>Badge<input type="text" name="badge" placeholder="Example: SUV" /></label>
+            <label>Status<input type="text" name="status" placeholder="Example: In stock" /></label>
+            <label class="span-2">Summary override<input type="text" name="summary" placeholder="Optional. Leave blank to build the summary from the fields above." /></label>
+            <label>Enquiry name<input type="text" name="enquiryName" placeholder="Used on the enquiry buttons" /></label>
+            <label>Featured on hero?
+              <select name="featured">
+                <option value="true">Yes</option>
+                <option value="false">No</option>
+              </select>
+            </label>
+            <label>Hide as sold?
+              <select name="sold">
+                <option value="false">No</option>
+                <option value="true">Yes</option>
+              </select>
+            </label>
+            <label>Stock card style
+              <select name="visualClass">
+                <option value="visual-one">Visual one</option>
+                <option value="visual-two">Visual two</option>
+                <option value="visual-three">Visual three</option>
+              </select>
+            </label>
+            <label>Hero style
+              <select name="heroVisualClass">
+                <option value="hero-vehicle-visual-one">Hero visual one</option>
+                <option value="hero-vehicle-visual-two">Hero visual two</option>
+                <option value="hero-vehicle-visual-three">Hero visual three</option>
+              </select>
+            </label>
+          </div>
+
+          <label>Spec bullet points
+            <textarea name="specs" rows="6" placeholder="One line per bullet point"></textarea>
+          </label>
+
+          <label>Photo paths
+            <textarea name="images" rows="5" placeholder="One path per line, for example: assets/cars/fiesta-st-front.jpg"></textarea>
+          </label>
+
+          <div class="photo-tools">
+            <div class="photo-dropzone" id="photo-dropzone" tabindex="0" role="button" aria-label="Add car photos">
+              <input type="file" id="photo-input" accept="image/*" multiple hidden />
+              <strong>Drop photos here or click to choose files</strong>
+              <p>The manager will preview them and fill the image paths for you.</p>
+            </div>
+
+            <div class="photo-actions">
+              <button type="button" class="action-btn action-btn-secondary action-btn-small" id="choose-photos">Choose photos</button>
+              <button type="button" class="action-btn action-btn-secondary action-btn-small" id="clear-photos">Clear photos</button>
+            </div>
+
+            <div class="photo-list" id="photo-list"></div>
+          </div>
+
+          <div class="helper-box">
+            <strong>How photo upload works</strong>
+            <p>Select or drop photos here, then copy those image files into <code>assets/cars/</code>. The manager will generate the paths and use the first photo as the cover image on the site.</p>
+          </div>
+        </form>
+      </section>
+
+      <aside class="manager-panel preview-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="eyebrow">Preview</p>
+            <h2>What this car will look like</h2>
+          </div>
+        </div>
+
+        <div id="preview-card" class="preview-card"></div>
+        <div class="helper-box export-box">
+          <strong>When you are done</strong>
+          <p>Click <code>Download stock-data.js</code> and replace the existing file in this project.</p>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script src="stock-data.js"></script>
+  <script src="stock-manager.js"></script>
+</body>
+</html>

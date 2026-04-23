@@ -3,7 +3,6 @@ const nav = document.querySelector(".site-nav");
 const stockList = Array.isArray(window.HDS_STOCK) ? window.HDS_STOCK : [];
 const liveStock = stockList.filter((car) => !car.sold);
 const featuredStock = liveStock.filter((car) => car.featured);
-const galleryIntervals = new Map();
 let galleryLightbox = null;
 
 if (menuToggle && nav) {
@@ -171,34 +170,6 @@ function updateGallery(gallery, nextIndex) {
   gallery.dataset.imageIndex = String(safeIndex);
 }
 
-function clearGalleryInterval(gallery) {
-  const key = gallery?.dataset.carIndex;
-  if (!key) return;
-  const existing = galleryIntervals.get(key);
-  if (existing) {
-    window.clearInterval(existing);
-    galleryIntervals.delete(key);
-  }
-}
-
-function startGalleryInterval(gallery) {
-  const carIndex = Number(gallery?.dataset.carIndex);
-  const images = getCarImages(liveStock[carIndex]);
-
-  clearGalleryInterval(gallery);
-
-  if (!gallery || images.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-    return;
-  }
-
-  const intervalId = window.setInterval(() => {
-    const currentIndex = Number(gallery.dataset.imageIndex || 0);
-    updateGallery(gallery, currentIndex + 1);
-  }, 4000);
-
-  galleryIntervals.set(String(carIndex), intervalId);
-}
-
 function createGalleryLightbox() {
   if (galleryLightbox) return galleryLightbox;
 
@@ -284,16 +255,6 @@ function closeGalleryLightbox() {
 function initializeStockGalleries() {
   document.querySelectorAll("[data-gallery]").forEach((gallery) => {
     updateGallery(gallery, Number(gallery.dataset.imageIndex || 0));
-    startGalleryInterval(gallery);
-
-    gallery.addEventListener("mouseenter", () => clearGalleryInterval(gallery));
-    gallery.addEventListener("mouseleave", () => startGalleryInterval(gallery));
-    gallery.addEventListener("focusin", () => clearGalleryInterval(gallery));
-    gallery.addEventListener("focusout", (event) => {
-      if (!gallery.contains(event.relatedTarget)) {
-        startGalleryInterval(gallery);
-      }
-    });
   });
 }
 
@@ -419,7 +380,6 @@ document.addEventListener("click", (event) => {
     if (!gallery) return;
 
     updateGallery(gallery, Number(gallery.dataset.imageIndex || 0) + direction);
-    startGalleryInterval(gallery);
     return;
   }
 
@@ -429,7 +389,6 @@ document.addEventListener("click", (event) => {
     if (!gallery) return;
 
     updateGallery(gallery, Number(galleryThumbnail.dataset.galleryThumb));
-    startGalleryInterval(gallery);
     return;
   }
 

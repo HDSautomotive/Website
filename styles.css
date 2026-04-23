@@ -198,7 +198,7 @@ select {
 
 .hero-layout {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(430px, 1.1fr);
+  grid-template-columns: minmax(0, 1.02fr) minmax(410px, 0.98fr);
   gap: 22px;
   align-items: stretch;
 }
@@ -227,8 +227,8 @@ select {
 }
 
 .hero-copy h1 {
-  max-width: 8.6ch;
-  font-size: clamp(2.9rem, 6vw, 5.4rem);
+  max-width: none;
+  font-size: clamp(2.45rem, 4.7vw, 4.55rem);
 }
 
 .hero-copy h1 span {

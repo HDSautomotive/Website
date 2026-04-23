@@ -42,7 +42,7 @@ code {
 .manager-shell {
   width: min(1440px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 28px 0 40px;
+  padding: 20px 0 32px;
 }
 
 .manager-header,
@@ -63,9 +63,9 @@ code {
 .manager-header {
   display: flex;
   justify-content: space-between;
-  gap: 24px;
-  padding: 28px;
-  margin-bottom: 24px;
+  gap: 18px;
+  padding: 20px 22px;
+  margin-bottom: 18px;
 }
 
 .manager-header h1,
@@ -79,7 +79,7 @@ code {
 
 .manager-header h1 {
   max-width: 11ch;
-  font-size: clamp(2.7rem, 5vw, 4.8rem);
+  font-size: clamp(2rem, 4vw, 3.4rem);
 }
 
 .lead,
@@ -93,7 +93,9 @@ code {
 
 .lead {
   max-width: 60ch;
-  margin: 16px 0 0;
+  margin: 10px 0 0;
+  font-size: 0.96rem;
+  line-height: 1.6;
 }
 
 .eyebrow {
@@ -109,7 +111,7 @@ code {
 .list-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
 }
 
 .action-btn {
@@ -119,11 +121,12 @@ code {
   gap: 8px;
   border: 1px solid transparent;
   border-radius: 999px;
-  padding: 13px 20px;
+  padding: 11px 16px;
   background: linear-gradient(135deg, var(--accent), var(--accent-strong));
   color: #180b00;
   font-weight: 800;
   cursor: pointer;
+  font-size: 0.92rem;
 }
 
 .action-btn-secondary {
@@ -139,7 +142,7 @@ code {
 }
 
 .action-btn-small {
-  padding: 10px 16px;
+  padding: 9px 14px;
 }
 
 .manager-layout {
@@ -150,19 +153,19 @@ code {
 }
 
 .manager-panel {
-  padding: 24px;
+  padding: 20px;
 }
 
 .panel-heading {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 18px;
+  gap: 12px;
+  margin-bottom: 14px;
 }
 
 .panel-heading h2 {
-  font-size: 2rem;
+  font-size: 1.65rem;
 }
 
 .stock-list {
@@ -505,12 +508,20 @@ select:focus {
 @media (max-width: 760px) {
   .manager-shell {
     width: min(100%, calc(100% - 20px));
-    padding-top: 16px;
+    padding-top: 12px;
   }
 
   .manager-header,
   .panel-heading {
     flex-direction: column;
+  }
+
+  .manager-header {
+    padding: 16px;
+  }
+
+  .manager-header h1 {
+    font-size: clamp(1.8rem, 8vw, 2.5rem);
   }
 
   .form-grid {

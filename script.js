@@ -4,6 +4,12 @@ const stockList = Array.isArray(window.HDS_STOCK) ? window.HDS_STOCK : [];
 const liveStock = stockList.filter((car) => !car.sold);
 const featuredStock = liveStock.filter((car) => car.featured);
 let galleryLightbox = null;
+const swipeState = {
+  startX: 0,
+  startY: 0,
+  carIndex: null,
+  lightbox: false
+};
 
 if (menuToggle && nav) {
   menuToggle.addEventListener("click", () => {
@@ -237,6 +243,51 @@ function initializeStockGalleries() {
   });
 }
 
+function handleSwipeStart(target, touch, options = {}) {
+  swipeState.startX = touch.clientX;
+  swipeState.startY = touch.clientY;
+  swipeState.carIndex = target?.dataset.carIndex ?? null;
+  swipeState.lightbox = Boolean(options.lightbox);
+}
+
+function handleSwipeEnd(target, touch) {
+  if (swipeState.carIndex === null) return;
+
+  const deltaX = touch.clientX - swipeState.startX;
+  const deltaY = touch.clientY - swipeState.startY;
+
+  swipeState.startX = 0;
+  swipeState.startY = 0;
+
+  if (Math.abs(deltaX) < 40 || Math.abs(deltaY) > 60) {
+    swipeState.carIndex = null;
+    swipeState.lightbox = false;
+    return;
+  }
+
+  const direction = deltaX < 0 ? 1 : -1;
+
+  if (swipeState.lightbox && galleryLightbox && !galleryLightbox.hasAttribute("hidden")) {
+    const car = liveStock[Number(galleryLightbox.dataset.carIndex)];
+    const images = getCarImages(car);
+
+    if (images.length) {
+      galleryLightbox.dataset.imageIndex = String(
+        (Number(galleryLightbox.dataset.imageIndex || 0) + direction + images.length) % images.length
+      );
+      updateGalleryLightbox();
+    }
+  } else {
+    const gallery = target || document.querySelector(`[data-gallery][data-car-index="${swipeState.carIndex}"]`);
+    if (gallery) {
+      updateGallery(gallery, Number(gallery.dataset.imageIndex || 0) + direction);
+    }
+  }
+
+  swipeState.carIndex = null;
+  swipeState.lightbox = false;
+}
+
 function renderHeroStock() {
   const heroRotator = document.querySelector("#hero-rotator");
 
@@ -333,7 +384,7 @@ function renderStockCards() {
   const stockShowcase = document.querySelector("#stock-showcase");
   if (!stockShowcase) return;
 
-  const featuredPreview = liveStock.slice(0, 3);
+  const featuredPreview = (featuredStock.length ? featuredStock : liveStock).slice(0, 3);
   stockShowcase.innerHTML = buildStockCards(featuredPreview);
 }
 
@@ -348,6 +399,34 @@ renderHeroStock();
 renderStockCards();
 renderFullStockPage();
 initializeStockGalleries();
+
+document.addEventListener("touchstart", (event) => {
+  const gallery = event.target.closest("[data-gallery]");
+  const lightboxStage = event.target.closest(".gallery-lightbox-stage");
+
+  if (lightboxStage && galleryLightbox && !galleryLightbox.hasAttribute("hidden")) {
+    handleSwipeStart(galleryLightbox, event.changedTouches[0], { lightbox: true });
+    return;
+  }
+
+  if (gallery) {
+    handleSwipeStart(gallery, event.changedTouches[0]);
+  }
+}, { passive: true });
+
+document.addEventListener("touchend", (event) => {
+  const gallery = event.target.closest("[data-gallery]");
+  const lightboxStage = event.target.closest(".gallery-lightbox-stage");
+
+  if (lightboxStage && galleryLightbox && !galleryLightbox.hasAttribute("hidden")) {
+    handleSwipeEnd(galleryLightbox, event.changedTouches[0]);
+    return;
+  }
+
+  if (gallery) {
+    handleSwipeEnd(gallery, event.changedTouches[0]);
+  }
+}, { passive: true });
 
 document.addEventListener("click", (event) => {
   const galleryButton = event.target.closest("[data-gallery-nav]");

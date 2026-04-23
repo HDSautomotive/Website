@@ -282,13 +282,9 @@ function renderHeroStock() {
     .join("");
 }
 
-function renderStockCards() {
-  const stockShowcase = document.querySelector("#stock-showcase");
-
-  if (!stockShowcase) return;
-
-  if (!liveStock.length) {
-    stockShowcase.innerHTML = `
+function buildStockCards(carsToRender) {
+  if (!carsToRender.length) {
+    return `
       <article class="stock-card stock-card-empty">
         <div class="stock-body">
           <div class="stock-title-row">
@@ -300,10 +296,9 @@ function renderStockCards() {
         </div>
       </article>
     `;
-    return;
   }
 
-  stockShowcase.innerHTML = liveStock
+  return carsToRender
     .map(
       (car, index) => `
         <article class="stock-card${index === 0 ? " stock-card-featured" : ""}">
@@ -334,8 +329,24 @@ function renderStockCards() {
     .join("");
 }
 
+function renderStockCards() {
+  const stockShowcase = document.querySelector("#stock-showcase");
+  if (!stockShowcase) return;
+
+  const featuredPreview = liveStock.slice(0, 3);
+  stockShowcase.innerHTML = buildStockCards(featuredPreview);
+}
+
+function renderFullStockPage() {
+  const stockPageShowcase = document.querySelector("#full-stock-showcase");
+  if (!stockPageShowcase) return;
+
+  stockPageShowcase.innerHTML = buildStockCards(liveStock);
+}
+
 renderHeroStock();
 renderStockCards();
+renderFullStockPage();
 initializeStockGalleries();
 
 document.addEventListener("click", (event) => {

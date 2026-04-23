@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Current Stock | HDS Automotive</title>
+  <meta
+    name="description"
+    content="Browse the full current stock list from HDS Automotive in Ware, Hertfordshire, with clear pricing, photos, and quick enquiry options."
+  />
+  <link rel="icon" type="image/png" href="assets/logo.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header">
+      <div class="container nav-row">
+        <a class="brand" href="index.html" aria-label="HDS Automotive home">
+          <img src="assets/logo-dark.jpg" alt="HDS Automotive logo" />
+        </a>
+
+        <button class="menu-toggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <nav class="site-nav" aria-label="Primary">
+          <a href="stock.html">Stock</a>
+          <a href="index.html#about">Why HDS</a>
+          <a href="index.html#process">Why Buy</a>
+          <a href="index.html#part-exchange">Part Exchange</a>
+          <a href="index.html#contact">Contact</a>
+        </nav>
+
+        <div class="header-actions">
+          <a href="tel:07550001837" class="btn btn-secondary btn-small">Call us</a>
+          <a href="https://wa.me/447550001837" class="btn btn-whatsapp btn-small" target="_blank" rel="noreferrer">WhatsApp us</a>
+          <a href="index.html#contact" class="btn btn-primary btn-small">Send us a message</a>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="section stock-page-hero">
+        <div class="container stock-page-hero-inner">
+          <div>
+            <p class="kicker">Current stock</p>
+            <h1>Browse the full HDS Automotive stock list.</h1>
+            <p class="hero-text">
+              See what is currently available, browse photos, and get in touch about the car that suits you best.
+            </p>
+          </div>
+          <div class="stock-page-hero-actions">
+            <a href="index.html#contact" class="btn btn-primary">Ask about a car</a>
+            <a href="tel:07550001837" class="btn btn-secondary">Call now</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section stock-page-section">
+        <div class="container">
+          <div class="section-heading">
+            <div>
+              <p class="kicker">Available now</p>
+              <h2>All current cars</h2>
+            </div>
+            <p>
+              Photos, key details, pricing, and quick enquiry options for every live vehicle currently in stock.
+            </p>
+          </div>
+
+          <div class="stock-showcase stock-showcase-full" id="full-stock-showcase"></div>
+        </div>
+      </section>
+
+      <section class="section cta-ribbon">
+        <div class="container cta-ribbon-inner">
+          <div>
+            <p class="kicker">Need more detail?</p>
+            <h2>Message us about a specific car and we will get back to you quickly.</h2>
+          </div>
+          <div class="cta-ribbon-actions">
+            <a href="index.html#contact" class="btn btn-primary">Send an enquiry</a>
+            <a href="https://wa.me/447550001837" class="btn btn-whatsapp" target="_blank" rel="noreferrer">WhatsApp</a>
+            <a href="index.html" class="btn btn-secondary">Back to homepage</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-row">
+        <a class="brand footer-brand" href="index.html" aria-label="HDS Automotive home">
+          <img src="assets/logo-dark.jpg" alt="HDS Automotive logo" />
+        </a>
+        <p>&copy; 2026 HDS Automotive. All rights reserved.</p>
+      </div>
+    </footer>
+  </div>
+
+  <script src="stock-data.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

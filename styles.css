@@ -1363,12 +1363,51 @@ select {
     justify-content: flex-start;
     justify-items: start;
   }
+
+  .hero {
+    padding: 42px 0 26px;
+  }
+
+  .section {
+    padding: 62px 0;
+  }
+
+  .hero-copy h1,
+  .section-heading h2,
+  .story-panel h2,
+  .contact-card h2,
+  .location-copy h2 {
+    max-width: 12ch;
+  }
+
+  .hero-stock-panel,
+  .contact-panel,
+  .hero-feature-card,
+  .contact-card,
+  .location-grid,
+  .warranty-band-inner,
+  .cta-ribbon-inner {
+    padding: 24px;
+  }
+
+  .stock-showcase {
+    gap: 16px;
+  }
 }
 
 @media (max-width: 760px) {
+  .container {
+    width: min(100% - 24px, 640px);
+  }
+
   .menu-toggle {
     display: inline-block;
     margin-left: auto;
+  }
+
+  .nav-row {
+    gap: 12px;
+    min-height: 76px;
   }
 
   .header-actions {
@@ -1377,14 +1416,14 @@ select {
 
   .site-nav {
     position: absolute;
-    top: 88px;
-    left: 16px;
-    right: 16px;
+    top: 76px;
+    left: 12px;
+    right: 12px;
     display: none;
     flex-direction: column;
     align-items: flex-start;
-    gap: 14px;
-    padding: 18px;
+    gap: 10px;
+    padding: 16px;
     margin-left: 0;
     border-radius: 18px;
     background: rgba(20, 22, 26, 0.98);
@@ -1396,7 +1435,7 @@ select {
   }
 
   .hero {
-    padding-top: 34px;
+    padding: 24px 0 18px;
   }
 
   .hero-partner-mark {
@@ -1428,10 +1467,52 @@ select {
 
   .hero-copy h1 {
     max-width: none;
+    font-size: clamp(2.85rem, 15vw, 4.2rem);
   }
 
   .brand img {
-    width: 148px;
+    width: 132px;
+  }
+
+  .kicker,
+  .panel-label,
+  .contact-link-email,
+  .location-email {
+    letter-spacing: 0.12em;
+  }
+
+  .hero-text,
+  .section-heading p,
+  .story-panel p,
+  .contact-panel p,
+  .hero-feature-card p,
+  .form-intro,
+  .location-copy p {
+    line-height: 1.65;
+    font-size: 0.96rem;
+  }
+
+  .hero-actions,
+  .card-actions,
+  .contact-panel-actions,
+  .cta-ribbon-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .hero-actions .btn,
+  .card-actions .btn,
+  .contact-panel-actions .btn,
+  .cta-ribbon-actions .btn {
+    width: 100%;
+  }
+
+  .hero-points div,
+  .benefit-item,
+  .process-grid article,
+  .cred-grid article,
+  .feature-metrics div {
+    padding: 16px;
   }
 
   .hero-stock-panel-head,
@@ -1444,6 +1525,59 @@ select {
   .hero-stock-panel-foot .btn {
     margin-left: 0;
     align-self: flex-start;
+  }
+
+  .hero-stock-panel,
+  .contact-panel,
+  .hero-feature-card,
+  .contact-card,
+  .location-grid,
+  .warranty-band-inner,
+  .cta-ribbon-inner {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .hero-rotator {
+    min-height: 332px;
+    margin: 14px 0;
+  }
+
+  .hero-vehicle-card {
+    padding: 14px;
+    border-radius: 20px;
+  }
+
+  .hero-vehicle-price,
+  .stock-title-row strong {
+    font-size: 1.7rem;
+  }
+
+  .section {
+    padding: 48px 0;
+  }
+
+  .section-heading {
+    margin-bottom: 22px;
+  }
+
+  .stock-body {
+    padding: 18px;
+  }
+
+  .stock-title-row {
+    flex-direction: column;
+  }
+
+  .stock-specs {
+    margin: 14px 0 18px;
+    gap: 8px;
+  }
+
+  .contact-card input,
+  .contact-card textarea,
+  .contact-card select {
+    padding: 13px 14px;
   }
 
   .footer-row {
@@ -1511,6 +1645,81 @@ select {
   .gallery-lightbox-footer {
     flex-direction: column;
     align-items: flex-start;
+  }
+}
+
+@media (max-width: 520px) {
+  .container {
+    width: calc(100% - 18px);
+  }
+
+  .site-header {
+    position: static;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(2.4rem, 16vw, 3.5rem);
+  }
+
+  .hero-text {
+    margin-top: 14px;
+  }
+
+  .hero-points {
+    gap: 10px;
+  }
+
+  .hero-stock-panel,
+  .contact-panel,
+  .hero-feature-card,
+  .contact-card,
+  .location-grid,
+  .warranty-band-inner,
+  .cta-ribbon-inner,
+  .stock-card {
+    border-radius: 18px;
+  }
+
+  .card-topline {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px 16px 0;
+  }
+
+  .stock-visual {
+    min-height: 248px;
+  }
+
+  .stock-visual-image .visual-label {
+    left: 14px;
+    right: 14px;
+    bottom: 14px;
+    font-size: 0.92rem;
+  }
+
+  .gallery-nav {
+    width: 36px;
+    height: 36px;
+    font-size: 1.3rem;
+  }
+
+  .gallery-count {
+    padding: 6px 9px;
+    font-size: 0.66rem;
+  }
+
+  .contact-link-phone,
+  .location-links a {
+    font-size: 1.22rem;
+  }
+
+  .gallery-lightbox {
+    padding: 8px;
+  }
+
+  .gallery-lightbox-dialog {
+    padding: 12px;
+    border-radius: 18px;
   }
 }
 

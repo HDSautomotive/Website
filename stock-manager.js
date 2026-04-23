@@ -37,7 +37,7 @@ const photoList = document.querySelector("#photo-list");
 const advertTextField = form?.elements.advertText;
 
 document.querySelector("#add-car")?.addEventListener("click", addCar);
-document.querySelector("#duplicate-car")?.addEventListener("click", duplicateCar);
+document.querySelector("#new-empty-car")?.addEventListener("click", addCar);
 document.querySelector("#delete-car")?.addEventListener("click", deleteCar);
 document.querySelector("#download-stock")?.addEventListener("click", downloadStockFile);
 document.querySelector("#reload-file")?.addEventListener("click", reloadFromFile);
@@ -578,22 +578,6 @@ function addCar() {
     stockNo: getNextStockNumber()
   }));
   selectedIndex = 0;
-  persistCars();
-  renderAll();
-}
-
-function duplicateCar() {
-  const source = cars[selectedIndex];
-  if (!source) return;
-
-  cars.splice(selectedIndex + 1, 0, normaliseCar({
-    ...source,
-    stockNo: `${source.stockNo || "NEW"}-COPY`,
-    title: `${source.title || "New car"} copy`,
-    featured: false,
-    sold: false
-  }));
-  selectedIndex += 1;
   persistCars();
   renderAll();
 }

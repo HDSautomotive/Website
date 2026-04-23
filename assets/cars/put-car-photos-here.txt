@@ -1,3 +1,0 @@
-Drop your vehicle photos in this folder.
-Then use paths like:
-assets/cars/fiesta-st-front.jpg

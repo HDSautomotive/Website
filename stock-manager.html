@@ -57,6 +57,18 @@
         </div>
 
         <form id="car-form" class="car-form">
+          <div class="helper-box helper-box-accent quick-fill-box">
+            <strong>Quick fill</strong>
+            <p>Paste a car advert, WhatsApp note, or Facebook Marketplace description and let the manager pull out the basics for you.</p>
+            <label>Paste advert details
+              <textarea name="advertText" rows="5" placeholder="Example: 2016 Ford Fiesta ST-3&#10;YY66 YST&#10;97,500 miles&#10;Petrol manual&#10;£6,000"></textarea>
+            </label>
+            <div class="quick-fill-actions">
+              <button type="button" class="action-btn action-btn-secondary action-btn-small" id="apply-advert-text">Apply pasted details</button>
+              <button type="button" class="action-btn action-btn-secondary action-btn-small" id="smart-fill">Fill missing fields</button>
+            </div>
+          </div>
+
           <div class="form-grid">
             <label>Stock number<input type="text" name="stockNo" /></label>
             <label>Car title<input type="text" name="title" /></label>

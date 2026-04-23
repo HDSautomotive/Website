@@ -28,9 +28,15 @@ function escapeHtml(value) {
     .replaceAll("'", "&#39;");
 }
 
+function getCarImages(car) {
+  if (!Array.isArray(car?.images)) return [];
+  return car.images
+    .filter((image) => typeof image === "string" && image.trim())
+    .map((image) => image.trim());
+}
+
 function getPrimaryImage(car) {
-  if (!Array.isArray(car?.images)) return "";
-  return car.images.find((image) => typeof image === "string" && image.trim())?.trim() || "";
+  return getCarImages(car)[0] || "";
 }
 
 function formatPrice(price) {
@@ -86,13 +92,25 @@ function renderHeroVisual(car) {
   return `<div class="hero-vehicle-visual ${escapeHtml(car.heroVisualClass || "hero-vehicle-visual-one")}"></div>`;
 }
 
-function renderStockVisual(car) {
-  const image = getPrimaryImage(car);
+function renderStockVisual(car, carIndex) {
+  const images = getCarImages(car);
+  const image = images[0] || "";
 
   if (image) {
     return `
-      <div class="stock-visual stock-visual-image">
+      <div class="stock-visual stock-visual-image" data-gallery data-car-index="${carIndex}" data-image-index="0">
         <img src="${escapeHtml(image)}" alt="${escapeHtml(car.title)}" loading="lazy" />
+        ${images.length > 1 ? `
+          <div class="stock-gallery-controls">
+            <button class="gallery-nav" type="button" data-gallery-nav="-1" data-car-index="${carIndex}" aria-label="Show previous photo for ${escapeHtml(car.title)}">
+              &#8249;
+            </button>
+            <span class="gallery-count">1 / ${images.length}</span>
+            <button class="gallery-nav" type="button" data-gallery-nav="1" data-car-index="${carIndex}" aria-label="Show next photo for ${escapeHtml(car.title)}">
+              &#8250;
+            </button>
+          </div>
+        ` : ""}
         <div class="visual-label">${escapeHtml(car.stockNo || "Stock car")}${car.featured ? " / Featured" : ""}</div>
       </div>
     `;
@@ -184,7 +202,7 @@ function renderStockCards() {
             <span class="stock-tag">${escapeHtml(car.featured ? "Featured" : (car.badge || "In stock"))}</span>
             <span class="stock-tag stock-tag-muted">${escapeHtml(car.status || "In stock")}</span>
           </div>
-          ${renderStockVisual(car)}
+          ${renderStockVisual(car, index)}
           <div class="stock-body">
             <div class="stock-title-row">
               <div>
@@ -211,8 +229,35 @@ renderHeroStock();
 renderStockCards();
 
 document.addEventListener("click", (event) => {
+  const galleryButton = event.target.closest("[data-gallery-nav]");
   const linkButton = event.target.closest(".link-btn");
   const reserveButton = event.target.closest(".reserve-btn");
+
+  if (galleryButton) {
+    const carIndex = Number(galleryButton.dataset.carIndex);
+    const direction = Number(galleryButton.dataset.galleryNav);
+    const gallery = galleryButton.closest("[data-gallery]");
+    const car = liveStock[carIndex];
+    const images = getCarImages(car);
+
+    if (!gallery || !images.length) return;
+
+    const nextIndex = (Number(gallery.dataset.imageIndex || 0) + direction + images.length) % images.length;
+    const imageElement = gallery.querySelector("img");
+    const countElement = gallery.querySelector(".gallery-count");
+
+    if (imageElement) {
+      imageElement.src = images[nextIndex];
+      imageElement.alt = car?.title || "Car photo";
+    }
+
+    if (countElement) {
+      countElement.textContent = `${nextIndex + 1} / ${images.length}`;
+    }
+
+    gallery.dataset.imageIndex = String(nextIndex);
+    return;
+  }
 
   if (linkButton) {
     const selectedCar = linkButton.dataset.car || "";

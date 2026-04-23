@@ -227,7 +227,7 @@ select {
 }
 
 .hero-copy h1 {
-  max-width: 9.2ch;
+  max-width: 8.6ch;
   font-size: clamp(2.9rem, 6vw, 5.4rem);
 }
 

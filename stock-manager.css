@@ -265,6 +265,13 @@ select:focus {
   background: rgba(255, 255, 255, 0.03);
 }
 
+.helper-box-accent {
+  background:
+    radial-gradient(circle at top right, rgba(255, 143, 31, 0.12), transparent 28%),
+    rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 143, 31, 0.18);
+}
+
 .helper-box strong {
   display: block;
   margin-bottom: 8px;
@@ -272,6 +279,21 @@ select:focus {
 
 .helper-box p {
   margin: 0;
+}
+
+.quick-fill-box {
+  display: grid;
+  gap: 14px;
+}
+
+.quick-fill-box label {
+  margin: 0;
+}
+
+.quick-fill-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .photo-tools {
@@ -501,5 +523,12 @@ select:focus {
 
   .photo-item {
     grid-template-columns: 1fr;
+  }
+
+  .quick-fill-actions .action-btn,
+  .photo-actions .action-btn,
+  .list-actions .action-btn,
+  .header-actions .action-btn {
+    width: 100%;
   }
 }

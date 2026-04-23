@@ -543,7 +543,7 @@ function smartFillCar(car, options = {}) {
   if (!car.stockNo) car.stockNo = getNextStockNumber();
   if (!car.enquiryName && car.title) car.enquiryName = car.title;
   if (!car.priceLabel && car.price > 0) car.priceLabel = formatPrice(car.price);
-  if (!car.badge) car.badge = inferBadge(car.title);
+  if (!car.badge || car.badge === "Used car") car.badge = inferBadge(car.title);
   if (!car.status) car.status = "In stock";
   if ((overwriteSummary || !car.summary) && car.summary) {
     car.summary = car.summary.trim();

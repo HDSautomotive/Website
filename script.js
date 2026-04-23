@@ -3,6 +3,8 @@ const nav = document.querySelector(".site-nav");
 const stockList = Array.isArray(window.HDS_STOCK) ? window.HDS_STOCK : [];
 const liveStock = stockList.filter((car) => !car.sold);
 const featuredStock = liveStock.filter((car) => car.featured);
+const galleryIntervals = new Map();
+let galleryLightbox = null;
 
 if (menuToggle && nav) {
   menuToggle.addEventListener("click", () => {
@@ -99,7 +101,9 @@ function renderStockVisual(car, carIndex) {
   if (image) {
     return `
       <div class="stock-visual stock-visual-image" data-gallery data-car-index="${carIndex}" data-image-index="0">
-        <img src="${escapeHtml(image)}" alt="${escapeHtml(car.title)}" loading="lazy" />
+        <button class="gallery-main-button" type="button" data-gallery-open aria-label="Open photo gallery for ${escapeHtml(car.title)}">
+          <img src="${escapeHtml(image)}" alt="${escapeHtml(car.title)}" loading="lazy" />
+        </button>
         ${images.length > 1 ? `
           <div class="stock-gallery-controls">
             <button class="gallery-nav" type="button" data-gallery-nav="-1" data-car-index="${carIndex}" aria-label="Show previous photo for ${escapeHtml(car.title)}">
@@ -109,6 +113,22 @@ function renderStockVisual(car, carIndex) {
             <button class="gallery-nav" type="button" data-gallery-nav="1" data-car-index="${carIndex}" aria-label="Show next photo for ${escapeHtml(car.title)}">
               &#8250;
             </button>
+          </div>
+          <div class="gallery-thumbnails" aria-label="Browse photos for ${escapeHtml(car.title)}">
+            ${images
+              .map(
+                (galleryImage, imageIndex) => `
+                  <button
+                    class="gallery-thumbnail${imageIndex === 0 ? " is-active" : ""}"
+                    type="button"
+                    data-gallery-thumb="${imageIndex}"
+                    aria-label="Show photo ${imageIndex + 1} for ${escapeHtml(car.title)}"
+                  >
+                    <img src="${escapeHtml(galleryImage)}" alt="" loading="lazy" />
+                  </button>
+                `
+              )
+              .join("")}
           </div>
         ` : ""}
         <div class="visual-label">${escapeHtml(car.stockNo || "Stock car")}${car.featured ? " / Featured" : ""}</div>
@@ -121,6 +141,160 @@ function renderStockVisual(car, carIndex) {
       <div class="visual-label">${escapeHtml(car.stockNo || "Stock car")}${car.featured ? " / Featured" : ""}</div>
     </div>
   `;
+}
+
+function updateGallery(gallery, nextIndex) {
+  const carIndex = Number(gallery?.dataset.carIndex);
+  const car = liveStock[carIndex];
+  const images = getCarImages(car);
+
+  if (!gallery || !images.length) return;
+
+  const safeIndex = ((nextIndex % images.length) + images.length) % images.length;
+  const imageElement = gallery.querySelector(".gallery-main-button img");
+  const countElement = gallery.querySelector(".gallery-count");
+  const thumbnails = gallery.querySelectorAll("[data-gallery-thumb]");
+
+  if (imageElement) {
+    imageElement.src = images[safeIndex];
+    imageElement.alt = car?.title || "Car photo";
+  }
+
+  if (countElement) {
+    countElement.textContent = `${safeIndex + 1} / ${images.length}`;
+  }
+
+  thumbnails.forEach((thumbnail) => {
+    thumbnail.classList.toggle("is-active", Number(thumbnail.dataset.galleryThumb) === safeIndex);
+  });
+
+  gallery.dataset.imageIndex = String(safeIndex);
+}
+
+function clearGalleryInterval(gallery) {
+  const key = gallery?.dataset.carIndex;
+  if (!key) return;
+  const existing = galleryIntervals.get(key);
+  if (existing) {
+    window.clearInterval(existing);
+    galleryIntervals.delete(key);
+  }
+}
+
+function startGalleryInterval(gallery) {
+  const carIndex = Number(gallery?.dataset.carIndex);
+  const images = getCarImages(liveStock[carIndex]);
+
+  clearGalleryInterval(gallery);
+
+  if (!gallery || images.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    return;
+  }
+
+  const intervalId = window.setInterval(() => {
+    const currentIndex = Number(gallery.dataset.imageIndex || 0);
+    updateGallery(gallery, currentIndex + 1);
+  }, 4000);
+
+  galleryIntervals.set(String(carIndex), intervalId);
+}
+
+function createGalleryLightbox() {
+  if (galleryLightbox) return galleryLightbox;
+
+  const lightbox = document.createElement("div");
+  lightbox.className = "gallery-lightbox";
+  lightbox.setAttribute("hidden", "");
+  lightbox.innerHTML = `
+    <div class="gallery-lightbox-backdrop" data-lightbox-close></div>
+    <div class="gallery-lightbox-dialog" role="dialog" aria-modal="true" aria-label="Vehicle photo gallery">
+      <button class="gallery-lightbox-close" type="button" data-lightbox-close aria-label="Close photo gallery">
+        &times;
+      </button>
+      <div class="gallery-lightbox-stage">
+        <button class="gallery-lightbox-nav" type="button" data-lightbox-nav="-1" aria-label="Show previous photo">
+          &#8249;
+        </button>
+        <img class="gallery-lightbox-image" src="" alt="" />
+        <button class="gallery-lightbox-nav" type="button" data-lightbox-nav="1" aria-label="Show next photo">
+          &#8250;
+        </button>
+      </div>
+      <div class="gallery-lightbox-footer">
+        <p class="gallery-lightbox-caption"></p>
+        <span class="gallery-lightbox-count"></span>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(lightbox);
+  galleryLightbox = lightbox;
+  return lightbox;
+}
+
+function updateGalleryLightbox() {
+  if (!galleryLightbox) return;
+
+  const carIndex = Number(galleryLightbox.dataset.carIndex);
+  const imageIndex = Number(galleryLightbox.dataset.imageIndex || 0);
+  const car = liveStock[carIndex];
+  const images = getCarImages(car);
+  const image = images[imageIndex];
+
+  if (!car || !image) return;
+
+  const imageElement = galleryLightbox.querySelector(".gallery-lightbox-image");
+  const captionElement = galleryLightbox.querySelector(".gallery-lightbox-caption");
+  const countElement = galleryLightbox.querySelector(".gallery-lightbox-count");
+
+  if (imageElement) {
+    imageElement.src = image;
+    imageElement.alt = car.title || "Vehicle photo";
+  }
+
+  if (captionElement) {
+    captionElement.textContent = car.title || "Vehicle photo";
+  }
+
+  if (countElement) {
+    countElement.textContent = `${imageIndex + 1} / ${images.length}`;
+  }
+}
+
+function openGalleryLightbox(carIndex, imageIndex) {
+  const car = liveStock[carIndex];
+  const images = getCarImages(car);
+
+  if (!images.length) return;
+
+  const lightbox = createGalleryLightbox();
+  lightbox.dataset.carIndex = String(carIndex);
+  lightbox.dataset.imageIndex = String(((imageIndex % images.length) + images.length) % images.length);
+  lightbox.removeAttribute("hidden");
+  document.body.classList.add("lightbox-open");
+  updateGalleryLightbox();
+}
+
+function closeGalleryLightbox() {
+  if (!galleryLightbox) return;
+  galleryLightbox.setAttribute("hidden", "");
+  document.body.classList.remove("lightbox-open");
+}
+
+function initializeStockGalleries() {
+  document.querySelectorAll("[data-gallery]").forEach((gallery) => {
+    updateGallery(gallery, Number(gallery.dataset.imageIndex || 0));
+    startGalleryInterval(gallery);
+
+    gallery.addEventListener("mouseenter", () => clearGalleryInterval(gallery));
+    gallery.addEventListener("mouseleave", () => startGalleryInterval(gallery));
+    gallery.addEventListener("focusin", () => clearGalleryInterval(gallery));
+    gallery.addEventListener("focusout", (event) => {
+      if (!gallery.contains(event.relatedTarget)) {
+        startGalleryInterval(gallery);
+      }
+    });
+  });
 }
 
 function renderHeroStock() {
@@ -227,35 +401,65 @@ function renderStockCards() {
 
 renderHeroStock();
 renderStockCards();
+initializeStockGalleries();
 
 document.addEventListener("click", (event) => {
   const galleryButton = event.target.closest("[data-gallery-nav]");
+  const galleryThumbnail = event.target.closest("[data-gallery-thumb]");
+  const galleryOpenButton = event.target.closest("[data-gallery-open]");
+  const lightboxCloseButton = event.target.closest("[data-lightbox-close]");
+  const lightboxNavButton = event.target.closest("[data-lightbox-nav]");
   const linkButton = event.target.closest(".link-btn");
   const reserveButton = event.target.closest(".reserve-btn");
 
   if (galleryButton) {
-    const carIndex = Number(galleryButton.dataset.carIndex);
-    const direction = Number(galleryButton.dataset.galleryNav);
     const gallery = galleryButton.closest("[data-gallery]");
-    const car = liveStock[carIndex];
+    const direction = Number(galleryButton.dataset.galleryNav);
+
+    if (!gallery) return;
+
+    updateGallery(gallery, Number(gallery.dataset.imageIndex || 0) + direction);
+    startGalleryInterval(gallery);
+    return;
+  }
+
+  if (galleryThumbnail) {
+    const gallery = galleryThumbnail.closest("[data-gallery]");
+
+    if (!gallery) return;
+
+    updateGallery(gallery, Number(galleryThumbnail.dataset.galleryThumb));
+    startGalleryInterval(gallery);
+    return;
+  }
+
+  if (galleryOpenButton) {
+    const gallery = galleryOpenButton.closest("[data-gallery]");
+
+    if (!gallery) return;
+
+    openGalleryLightbox(
+      Number(gallery.dataset.carIndex),
+      Number(gallery.dataset.imageIndex || 0)
+    );
+    return;
+  }
+
+  if (lightboxCloseButton) {
+    closeGalleryLightbox();
+    return;
+  }
+
+  if (lightboxNavButton && galleryLightbox && !galleryLightbox.hasAttribute("hidden")) {
+    const car = liveStock[Number(galleryLightbox.dataset.carIndex)];
     const images = getCarImages(car);
 
-    if (!gallery || !images.length) return;
+    if (!images.length) return;
 
-    const nextIndex = (Number(gallery.dataset.imageIndex || 0) + direction + images.length) % images.length;
-    const imageElement = gallery.querySelector("img");
-    const countElement = gallery.querySelector(".gallery-count");
-
-    if (imageElement) {
-      imageElement.src = images[nextIndex];
-      imageElement.alt = car?.title || "Car photo";
-    }
-
-    if (countElement) {
-      countElement.textContent = `${nextIndex + 1} / ${images.length}`;
-    }
-
-    gallery.dataset.imageIndex = String(nextIndex);
+    galleryLightbox.dataset.imageIndex = String(
+      (Number(galleryLightbox.dataset.imageIndex || 0) + Number(lightboxNavButton.dataset.lightboxNav) + images.length) % images.length
+    );
+    updateGalleryLightbox();
     return;
   }
 
@@ -274,6 +478,28 @@ document.addEventListener("click", (event) => {
       "Viewing request",
       `Hi, I would like to arrange a viewing for the ${selectedCar}. Please can you contact me with availability?`
     );
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (!galleryLightbox || galleryLightbox.hasAttribute("hidden")) return;
+
+  if (event.key === "Escape") {
+    closeGalleryLightbox();
+    return;
+  }
+
+  if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+    const car = liveStock[Number(galleryLightbox.dataset.carIndex)];
+    const images = getCarImages(car);
+
+    if (!images.length) return;
+
+    const direction = event.key === "ArrowLeft" ? -1 : 1;
+    galleryLightbox.dataset.imageIndex = String(
+      (Number(galleryLightbox.dataset.imageIndex || 0) + direction + images.length) % images.length
+    );
+    updateGalleryLightbox();
   }
 });
 

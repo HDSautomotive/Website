@@ -1517,6 +1517,10 @@ select {
     font-size: clamp(2.2rem, 9.2vw, 3.5rem);
   }
 
+  .hero-copy h1 span:last-child {
+    white-space: normal;
+  }
+
   .brand img {
     width: 132px;
   }
@@ -1711,7 +1715,7 @@ select {
   }
 
   .hero-copy h1 {
-    font-size: clamp(1.85rem, 8.5vw, 2.5rem);
+    font-size: clamp(2.15rem, 10vw, 2.9rem);
   }
 
   .hero-text {

@@ -186,7 +186,10 @@ select {
 }
 
 .btn-card {
-  flex: 1 1 180px;
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 11px 16px;
+  font-size: 0.92rem;
 }
 
 .hero {
@@ -1569,9 +1572,13 @@ select {
     flex-direction: column;
   }
 
-  .stock-specs {
-    margin: 14px 0 18px;
-    gap: 8px;
+.stock-specs {
+  margin: 14px 0 18px;
+  gap: 8px;
+}
+
+  .card-actions {
+    gap: 10px;
   }
 
   .contact-card input,

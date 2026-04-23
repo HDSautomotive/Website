@@ -231,6 +231,11 @@ select {
   font-size: clamp(2.9rem, 6vw, 5.4rem);
 }
 
+.hero-copy h1 span {
+  display: block;
+  white-space: nowrap;
+}
+
 .hero-text,
 .section-heading p,
 .story-panel p,
@@ -1509,7 +1514,7 @@ select {
 
   .hero-copy h1 {
     max-width: none;
-    font-size: clamp(2.85rem, 15vw, 4.2rem);
+    font-size: clamp(2.2rem, 9.2vw, 3.5rem);
   }
 
   .brand img {
@@ -1706,7 +1711,7 @@ select {
   }
 
   .hero-copy h1 {
-    font-size: clamp(2.4rem, 16vw, 3.5rem);
+    font-size: clamp(1.85rem, 8.5vw, 2.5rem);
   }
 
   .hero-text {

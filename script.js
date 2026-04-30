@@ -369,15 +369,29 @@ function buildStockCards(carsToRender) {
             <ul class="stock-specs">
               ${(car.specs || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
             </ul>
-            <div class="card-actions">
-              <button class="btn btn-primary btn-card link-btn" data-car="${escapeHtml(car.enquiryName || car.title)}">Ask about this car</button>
-              <button class="btn btn-secondary btn-card reserve-btn" data-car="${escapeHtml(car.enquiryName || car.title)}">Arrange a viewing</button>
-            </div>
+            ${renderCardActions(car)}
           </div>
         </article>
       `
     )
     .join("");
+}
+
+function getAdvertUrl(car) {
+  const url = String(car?.advertUrl || car?.autotraderUrl || "").trim();
+  return /^https?:\/\//i.test(url) ? url : "";
+}
+
+function renderCardActions(car) {
+  const advertUrl = getAdvertUrl(car);
+
+  return `
+    <div class="card-actions">
+      <button class="btn btn-primary btn-card link-btn" data-car="${escapeHtml(car.enquiryName || car.title)}">Ask about this car</button>
+      <button class="btn btn-secondary btn-card reserve-btn" data-car="${escapeHtml(car.enquiryName || car.title)}">Arrange a viewing</button>
+      ${advertUrl ? `<a class="btn btn-secondary btn-card" href="${escapeHtml(advertUrl)}" target="_blank" rel="noreferrer">View Auto Trader advert</a>` : ""}
+    </div>
+  `;
 }
 
 function renderStockCards() {

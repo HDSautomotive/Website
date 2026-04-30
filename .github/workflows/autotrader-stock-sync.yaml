@@ -1,0 +1,51 @@
+name: Auto Trader Stock Sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 */2 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: autotrader-stock-sync
+  cancel-in-progress: false
+
+jobs:
+  sync-stock:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout site
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Pull stock from Auto Trader
+        env:
+          AUTOTRADER_API_KEY: ${{ secrets.AUTOTRADER_API_KEY }}
+          AUTOTRADER_API_SECRET: ${{ secrets.AUTOTRADER_API_SECRET }}
+          AUTOTRADER_ADVERTISER_ID: ${{ secrets.AUTOTRADER_ADVERTISER_ID }}
+          AUTOTRADER_API_URL: ${{ vars.AUTOTRADER_API_URL || 'https://api.autotrader.co.uk' }}
+          AUTOTRADER_SOURCE: ${{ vars.AUTOTRADER_SOURCE || 'stock' }}
+          AUTOTRADER_ENDPOINT: ${{ vars.AUTOTRADER_ENDPOINT }}
+          AUTOTRADER_EXTRA_QUERY: ${{ vars.AUTOTRADER_EXTRA_QUERY }}
+          AUTOTRADER_SKIP_IF_UNCONFIGURED: "true"
+        run: node tools/autotrader-stock-sync.mjs
+
+      - name: Commit stock update
+        run: |
+          if git diff --quiet -- stock-data.js; then
+            echo "No stock changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add stock-data.js
+          git commit -m "Sync Auto Trader stock"
+          git push
